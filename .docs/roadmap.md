@@ -13,7 +13,7 @@
 
 | タスクID | 状態 | 依存タスク | 対応要件 | 概要 |
 |----|------|------|--------|--------|
-| T-M1-1 | ⬜ | - | - | プロジェクト初期セットアップ（package.json, tsconfig, tsup, .env.example） |
+| T-M1-1 | ✅ | - | - | プロジェクト初期セットアップ（package.json, tsconfig, tsup, .env.example） |
 | T-M1-2 | ⬜ | T-M1-1 | FR-011, FR-012 | 設定管理モジュール（config.ts）の実装 |
 | T-M1-3 | ⬜ | T-M1-1 | - | 型定義（types.ts）の実装 |
 

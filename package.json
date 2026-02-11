@@ -1,0 +1,22 @@
+{
+  "name": "veo3",
+  "version": "1.0.0",
+  "description": "Google Veo 3 API を利用したテキストプロンプトからの動画生成 CLI ツール",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "generate": "node dist/cli.js"
+  },
+  "keywords": [],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@google/genai": "^1.40.0",
+    "commander": "^14.0.3",
+    "dotenv": "^17.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
