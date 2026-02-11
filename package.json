@@ -7,6 +7,9 @@
     "build": "tsup",
     "generate": "node .build/cli.js"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "keywords": [],
   "license": "UNLICENSED",
   "dependencies": {

@@ -16,6 +16,7 @@ program
   .name("veo3")
   .description("Google Veo 3 API を利用したテキストプロンプトからの動画生成 CLI ツール")
   .version("1.0.0")
+  .showHelpAfterError()
   .argument("<prompt>", "動画生成に使用するテキストプロンプト")
   .option("-m, --model <model>", `モデル (fast / standard) [デフォルト: ${DEFAULTS.model}]`)
   .option("-r, --resolution <resolution>", `解像度 (720p / 1080p / 4K) [デフォルト: ${DEFAULTS.resolution}]`)

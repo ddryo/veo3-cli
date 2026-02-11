@@ -36,7 +36,7 @@ Google Veo 3 API を利用して、テキストプロンプトから動画を生
 
 | カテゴリ | 技術 | 選定理由 |
 |----------|------|----------|
-| ランタイム | Node.js (>=18) | Veo API SDK が Node.js を公式サポートしているため |
+| ランタイム | Node.js (>=20) | Veo API SDK (@google/genai) が Node.js 20 以上を要求するため |
 | 言語 | TypeScript | 型安全性により CLI オプションやAPI レスポンスの扱いを堅牢にするため |
 | AI SDK | @google/genai | Google 公式の Gemini API SDK。Veo 3 の動画生成をネイティブサポート |
 | CLI パーサー | commander | Node.js CLI の定番ライブラリ。オプション定義・バリデーションが容易 |

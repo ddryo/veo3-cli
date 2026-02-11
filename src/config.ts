@@ -9,8 +9,8 @@ import type {
 } from "./types.js";
 import { DEFAULTS, MODEL_MAP } from "./types.js";
 
-// .env ファイルを読み込む
-dotenv.config();
+// .env ファイルを読み込む（ログ出力を抑止）
+dotenv.config({ quiet: true });
 
 const VALID_MODELS: readonly string[] = ["fast", "standard"];
 const VALID_RESOLUTIONS: readonly string[] = ["720p", "1080p", "4K"];
