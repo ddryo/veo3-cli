@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsup",
-    "generate": "node dist/cli.js"
+    "generate": "node .build/cli.js"
   },
   "keywords": [],
   "license": "UNLICENSED",

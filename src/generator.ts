@@ -58,12 +58,17 @@ export async function generateVideo(
 
   // ポーリングループ
   const startTime = Date.now();
+  const deadline = startTime + POLL_TIMEOUT_MS;
+
+  // 初回レスポンスの失敗チェック
+  checkOperationError(operation);
 
   while (!operation.done) {
-    const elapsed = Date.now() - startTime;
+    const now = Date.now();
+    const remaining = deadline - now;
 
     // タイムアウトチェック
-    if (elapsed >= POLL_TIMEOUT_MS) {
+    if (remaining <= 0) {
       throw new Error(
         `動画生成がタイムアウトしました（${POLL_TIMEOUT_MS / 1000}秒）。\n` +
           "時間をおいて再度お試しください。",
@@ -71,11 +76,19 @@ export async function generateVideo(
     }
 
     // 経過時間を表示
-    const elapsedSec = Math.floor(elapsed / 1000);
+    const elapsedSec = Math.floor((now - startTime) / 1000);
     process.stdout.write(`\r待機中... ${elapsedSec}秒経過`);
 
-    // ポーリング間隔を待つ
-    await sleep(POLL_INTERVAL_MS);
+    // ポーリング間隔を待つ（残り時間を超えない）
+    await sleep(Math.min(POLL_INTERVAL_MS, remaining));
+
+    // タイムアウト再チェック
+    if (Date.now() >= deadline) {
+      throw new Error(
+        `動画生成がタイムアウトしました（${POLL_TIMEOUT_MS / 1000}秒）。\n` +
+          "時間をおいて再度お試しください。",
+      );
+    }
 
     // オペレーション状態を確認
     operation = await ai.operations.getVideosOperation({
@@ -83,10 +96,7 @@ export async function generateVideo(
     });
 
     // 失敗・キャンセル検出
-    if (operation.error) {
-      const errorDetail = JSON.stringify(operation.error);
-      throw new Error(`動画生成に失敗しました: ${errorDetail}`);
-    }
+    checkOperationError(operation);
   }
 
   // 改行を入れて経過時間表示をクリア
@@ -116,6 +126,14 @@ export async function generateVideo(
 // ---------------------------------------------------------------------------
 // ユーティリティ
 // ---------------------------------------------------------------------------
+
+/** オペレーションのエラー状態をチェックし、失敗時は例外を投げる */
+function checkOperationError(operation: GenerateVideosOperation): void {
+  if (operation.error) {
+    const errorDetail = JSON.stringify(operation.error);
+    throw new Error(`動画生成に失敗しました: ${errorDetail}`);
+  }
+}
 
 /** 指定ミリ秒待機する */
 function sleep(ms: number): Promise<void> {

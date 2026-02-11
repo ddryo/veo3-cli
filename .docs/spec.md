@@ -57,6 +57,7 @@ veo3/
 │   ├── validator.ts    # パラメータバリデーション
 │   ├── config.ts       # 設定解決（CLI 引数 > .env > デフォルト）
 │   └── types.ts        # 型定義
+├── .build/             # tsup ビルド出力先（gitignore）
 ├── dist/               # 生成された動画の出力先（gitignore）
 ├── .env.example        # 環境変数テンプレート
 ├── package.json
