@@ -1,51 +1,9 @@
 import dotenv from "dotenv";
+import type { CliOptions, ModelAlias, ResolvedConfig } from "./types.js";
+import { DEFAULTS, MODEL_MAP } from "./types.js";
 
 // .env ファイルを読み込む
 dotenv.config();
-
-/** CLI で指定可能なモデル名 */
-export type ModelAlias = "fast" | "standard";
-
-/** CLI で指定可能な解像度 */
-export type Resolution = "720p" | "1080p" | "4K";
-
-/** CLI で指定可能なアスペクト比 */
-export type AspectRatio = "16:9" | "9:16";
-
-/** CLI で指定可能な動画尺（秒） */
-export type Duration = 4 | 6 | 8;
-
-/** CLI 引数として渡される部分的な設定 */
-export interface CliOptions {
-  model?: string;
-  resolution?: string;
-  aspect?: string;
-  duration?: number;
-}
-
-/** 解決済みの最終設定オブジェクト */
-export interface ResolvedConfig {
-  apiKey: string;
-  model: string;
-  modelAlias: ModelAlias;
-  resolution: Resolution;
-  aspectRatio: AspectRatio;
-  duration: Duration;
-}
-
-/** モデルエイリアスから API モデル名へのマッピング */
-const MODEL_MAP: Record<ModelAlias, string> = {
-  fast: "veo-3.1-fast-generate-preview",
-  standard: "veo-3.1-generate-preview",
-};
-
-/** デフォルト値 */
-const DEFAULTS = {
-  model: "fast" as ModelAlias,
-  resolution: "720p" as Resolution,
-  aspectRatio: "16:9" as AspectRatio,
-  duration: 8 as Duration,
-} as const;
 
 /**
  * CLI 引数 > .env > デフォルト値 の優先順位で設定を解決する。
@@ -70,9 +28,9 @@ export function resolveConfig(cliOptions: CliOptions = {}): ResolvedConfig {
 
   // CLI 引数 > .env > デフォルト値 の優先順位で解決
   const modelAlias = (cliOptions.model ?? envModel ?? DEFAULTS.model) as ModelAlias;
-  const resolution = (cliOptions.resolution ?? envResolution ?? DEFAULTS.resolution) as Resolution;
-  const aspectRatio = (cliOptions.aspect ?? envAspect ?? DEFAULTS.aspectRatio) as AspectRatio;
-  const duration = (cliOptions.duration ?? parseIntOrUndefined(envDuration) ?? DEFAULTS.duration) as Duration;
+  const resolution = (cliOptions.resolution ?? envResolution ?? DEFAULTS.resolution) as ResolvedConfig["resolution"];
+  const aspectRatio = (cliOptions.aspect ?? envAspect ?? DEFAULTS.aspectRatio) as ResolvedConfig["aspectRatio"];
+  const duration = (cliOptions.duration ?? parseIntOrUndefined(envDuration) ?? DEFAULTS.duration) as ResolvedConfig["duration"];
 
   // モデル名のマッピング
   const model = MODEL_MAP[modelAlias];
