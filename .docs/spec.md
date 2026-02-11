@@ -26,7 +26,7 @@ Google Veo 3 API を利用して、テキストプロンプトから動画を生
 | FR-009 | メタデータ JSON 保存 | 動画と同名の `.json` ファイルにプロンプト・設定値・生成日時などのメタデータを保存する | Must | ✓ |
 | FR-010 | 安全なダウンロード | `.part` 拡張子で一時保存し、完了後にリネームすることで破損ファイルを防止する | Must | ✓ |
 | FR-011 | API キー認証 | `.env` の `GOOGLE_API_KEY` で認証する。未設定時は分かりやすいエラーメッセージを表示する | Must | ✓ |
-| FR-012 | 設定の優先順位 | CLI 引数 > `.env` > デフォルト値の優先順位でパラメータを解決する | Must | ✓ |
+| FR-012 | 設定の優先順位 | CLI 引数 > `.env`（環境変数） > デフォルト値の優先順位でパラメータを解決する | Must | ✓ |
 | FR-013 | エラーハンドリング | API エラー（429 レート制限、ポリシー違反等）を分類し、ユーザーに分かりやすく表示する | Must | ✓ |
 
 **優先度**: Must（必須）/ Should（推奨）/ Could（任意）
@@ -60,7 +60,8 @@ veo3/
 ├── dist/               # 生成された動画の出力先（gitignore）
 ├── .env.example        # 環境変数テンプレート
 ├── package.json
-└── tsconfig.json
+├── tsconfig.json
+└── tsup.config.ts      # tsup ビルド設定
 ```
 
 ### コンポーネント構成
@@ -102,6 +103,16 @@ npm run generate -- "<プロンプト>" [オプション]
 | `--aspect` | `-a` | string | 16:9, 9:16 | 16:9 | FR-004 |
 | `--duration` | `-d` | number | 4, 6, 8 | 8 | FR-005 |
 
+### 環境変数
+
+| 変数名 | 説明 | 必須 |
+|--------|------|------|
+| `GOOGLE_API_KEY` | Google AI API キー | Yes |
+| `VEO_MODEL` | デフォルトのモデル（fast / standard） | No |
+| `VEO_RESOLUTION` | デフォルトの解像度（720p / 1080p / 4K） | No |
+| `VEO_ASPECT` | デフォルトのアスペクト比（16:9 / 9:16） | No |
+| `VEO_DURATION` | デフォルトの動画尺（4 / 6 / 8） | No |
+
 ### モデルマッピング
 
 | CLI 値 | API モデル名 | 特徴 |
@@ -120,6 +131,17 @@ npm run generate -- "<プロンプト>" [オプション]
 | duration | number | 動画尺（秒） |
 | createdAt | string | 生成日時（ISO 8601） |
 | outputFile | string | 出力ファイルパス |
+
+### 解決済み設定（ResolvedConfig）
+
+| フィールド | 型 | 説明 |
+|-----------|-----|------|
+| apiKey | string | Google AI API キー |
+| model | string | API モデル名（例: veo-3.1-fast-generate-preview） |
+| modelAlias | ModelAlias | CLI エイリアス（fast / standard） |
+| resolution | Resolution | 解像度 |
+| aspectRatio | AspectRatio | アスペクト比 |
+| duration | Duration | 動画尺（秒） |
 
 ### パラメータ制約
 
