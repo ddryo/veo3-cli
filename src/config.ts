@@ -1,9 +1,21 @@
 import dotenv from "dotenv";
-import type { CliOptions, ModelAlias, ResolvedConfig } from "./types.js";
+import type {
+  AspectRatio,
+  CliOptions,
+  Duration,
+  ModelAlias,
+  Resolution,
+  ResolvedConfig,
+} from "./types.js";
 import { DEFAULTS, MODEL_MAP } from "./types.js";
 
 // .env ファイルを読み込む
 dotenv.config();
+
+const VALID_MODELS: readonly string[] = ["fast", "standard"];
+const VALID_RESOLUTIONS: readonly string[] = ["720p", "1080p", "4K"];
+const VALID_ASPECTS: readonly string[] = ["16:9", "9:16"];
+const VALID_DURATIONS: readonly number[] = [4, 6, 8];
 
 /**
  * CLI 引数 > .env > デフォルト値 の優先順位で設定を解決する。
@@ -26,20 +38,36 @@ export function resolveConfig(cliOptions: CliOptions = {}): ResolvedConfig {
   const envAspect = process.env.VEO_ASPECT;
   const envDuration = process.env.VEO_DURATION;
 
-  // CLI 引数 > .env > デフォルト値 の優先順位で解決
-  const modelAlias = (cliOptions.model ?? envModel ?? DEFAULTS.model) as ModelAlias;
-  const resolution = (cliOptions.resolution ?? envResolution ?? DEFAULTS.resolution) as ResolvedConfig["resolution"];
-  const aspectRatio = (cliOptions.aspect ?? envAspect ?? DEFAULTS.aspectRatio) as ResolvedConfig["aspectRatio"];
-  const duration = (cliOptions.duration ?? parseIntOrUndefined(envDuration) ?? DEFAULTS.duration) as ResolvedConfig["duration"];
+  // CLI 引数 > .env > デフォルト値 の優先順位で解決・バリデーション
+  const modelAlias = validateOption(
+    "model",
+    cliOptions.model ?? envModel ?? DEFAULTS.model,
+    VALID_MODELS,
+  ) as ModelAlias;
+
+  const resolution = validateOption(
+    "resolution",
+    cliOptions.resolution ?? envResolution ?? DEFAULTS.resolution,
+    VALID_RESOLUTIONS,
+  ) as Resolution;
+
+  const aspectRatio = validateOption(
+    "aspect",
+    cliOptions.aspect ?? envAspect ?? DEFAULTS.aspectRatio,
+    VALID_ASPECTS,
+  ) as AspectRatio;
+
+  const rawDuration = cliOptions.duration ?? parseDuration(envDuration) ?? DEFAULTS.duration;
+  if (!VALID_DURATIONS.includes(rawDuration)) {
+    throw new Error(
+      `不正な動画尺です: "${rawDuration}"\n` +
+        `指定可能な値: ${VALID_DURATIONS.join(", ")}`,
+    );
+  }
+  const duration = rawDuration as Duration;
 
   // モデル名のマッピング
   const model = MODEL_MAP[modelAlias];
-  if (!model) {
-    throw new Error(
-      `不正なモデル名です: "${modelAlias}"\n` +
-        `指定可能な値: fast, standard`,
-    );
-  }
 
   return {
     apiKey,
@@ -51,9 +79,24 @@ export function resolveConfig(cliOptions: CliOptions = {}): ResolvedConfig {
   };
 }
 
-/** 文字列を整数にパースする。パース不可の場合は undefined を返す */
-function parseIntOrUndefined(value: string | undefined): number | undefined {
+/** 許容値リストに含まれるか検証する */
+function validateOption(
+  name: string,
+  value: string,
+  allowed: readonly string[],
+): string {
+  if (!allowed.includes(value)) {
+    throw new Error(
+      `不正な${name}です: "${value}"\n` +
+        `指定可能な値: ${allowed.join(", ")}`,
+    );
+  }
+  return value;
+}
+
+/** 文字列を厳密にDuration整数にパースする。パース不可の場合は undefined を返す */
+function parseDuration(value: string | undefined): number | undefined {
   if (value === undefined) return undefined;
-  const parsed = parseInt(value, 10);
-  return isNaN(parsed) ? undefined : parsed;
+  if (!/^\d+$/.test(value)) return undefined;
+  return Number(value);
 }
