@@ -3,6 +3,7 @@ import { resolveConfig } from "./config.js";
 import { validateConfig } from "./validator.js";
 import { generateVideo } from "./generator.js";
 import { downloadVideo } from "./downloader.js";
+import { formatErrorMessage } from "./errors.js";
 import { DEFAULTS } from "./types.js";
 
 // ---------------------------------------------------------------------------
@@ -61,4 +62,13 @@ program
 // エントリポイント
 // ---------------------------------------------------------------------------
 
-program.parse();
+async function main(): Promise<void> {
+  try {
+    await program.parseAsync();
+  } catch (error: unknown) {
+    console.error(`\n${formatErrorMessage(error)}`);
+    process.exit(1);
+  }
+}
+
+main();
