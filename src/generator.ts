@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import type { GenerateVideosOperation } from "@google/genai";
+import type { GenerateVideosOperation, GeneratedVideo } from "@google/genai";
 import type { ResolvedConfig } from "./types.js";
 
 // ---------------------------------------------------------------------------
@@ -22,6 +22,8 @@ export interface GenerateVideoResult {
   videoUri: string;
   /** 生成された動画の MIME タイプ */
   mimeType: string;
+  /** SDK の GeneratedVideo オブジェクト（ダウンロード用） */
+  generatedVideo: GeneratedVideo;
 }
 
 // ---------------------------------------------------------------------------
@@ -107,6 +109,7 @@ export async function generateVideo(
   return {
     videoUri: video.uri,
     mimeType: video.mimeType ?? "video/mp4",
+    generatedVideo: generatedVideos[0],
   };
 }
 
