@@ -75,7 +75,7 @@ export async function downloadVideo(
   try {
     // .part 拡張子で一時保存
     await ai.files.download({
-      file: result.generatedVideo,
+      file: result.generatedVideo.video,
       downloadPath: partPath,
     });
 
