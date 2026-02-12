@@ -55,7 +55,7 @@ npm run generate -- "夕暮れの海岸を歩く猫" --model standard --resoluti
 
 | オプション | 短縮 | 型 | 選択肢 | デフォルト | 説明 |
 |-----------|------|-----|--------|-----------|------|
-| `--model` | `-m` | string | `fast`, `standard` | `fast` | 使用するモデル |
+| `--model` | `-m` | string | `fast`, `standard` | `standard` | 使用するモデル |
 | `--resolution` | `-r` | string | `720p`, `1080p`, `4K` | `720p` | 動画の解像度 |
 | `--aspect` | `-a` | string | `16:9`, `9:16` | `16:9` | アスペクト比 |
 | `--duration` | `-d` | number | `4`, `6`, `8` | `8` | 動画尺（秒） |

@@ -16,7 +16,7 @@ Google Veo 3 API を利用して、テキストプロンプトから動画を生
 | ID | 機能名 | 説明 | 優先度 | MVP |
 |----|--------|------|--------|-----|
 | FR-001 | プロンプト指定による動画生成 | テキストプロンプトを引数として渡し、Veo 3 API で動画を生成する | Must | ✓ |
-| FR-002 | モデル切替 | `--model` オプションで fast（高速・安価）/ standard（高品質）を選択できる。デフォルトは fast | Must | ✓ |
+| FR-002 | モデル切替 | `--model` オプションで fast（高速・安価）/ standard（高品質）を選択できる。デフォルトは standard | Must | ✓ |
 | FR-003 | 解像度指定 | `--resolution` オプションで 720p / 1080p / 4K を指定できる | Must | ✓ |
 | FR-004 | アスペクト比指定 | `--aspect` オプションで 16:9 / 9:16 を指定できる | Must | ✓ |
 | FR-005 | 動画尺指定 | `--duration` オプションで 4 / 6 / 8 秒を指定できる | Must | ✓ |
@@ -106,7 +106,7 @@ npm run generate -- "<プロンプト>" [オプション]
 
 | オプション | 短縮 | 型 | 選択肢 | デフォルト | 対応要件 |
 |-----------|------|-----|--------|-----------|----------|
-| `--model` | `-m` | string | fast, standard | fast | FR-002 |
+| `--model` | `-m` | string | fast, standard | standard | FR-002 |
 | `--resolution` | `-r` | string | 720p, 1080p, 4K | 720p | FR-003 |
 | `--aspect` | `-a` | string | 16:9, 9:16 | 16:9 | FR-004 |
 | `--duration` | `-d` | number | 4, 6, 8 | 8 | FR-005 |
