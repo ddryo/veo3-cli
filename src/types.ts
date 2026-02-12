@@ -74,7 +74,7 @@ export const MODEL_MAP: Record<ModelAlias, string> = {
 
 /** デフォルト値 */
 export const DEFAULTS = {
-  model: "fast" as ModelAlias,
+  model: "standard" as ModelAlias,
   resolution: "720p" as Resolution,
   aspectRatio: "16:9" as AspectRatio,
   duration: 8 as Duration,
