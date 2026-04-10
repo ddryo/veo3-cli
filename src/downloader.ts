@@ -9,8 +9,11 @@ import type { ResolvedConfig, VideoMetadata } from "./types.js";
 // 定数
 // ---------------------------------------------------------------------------
 
-/** 動画の出力先ディレクトリ */
+/** 通常のテキスト生成の出力先 */
 const OUTPUT_DIR = "dist";
+
+/** loop コマンドの出力先（dist 直下のサブフォルダ） */
+export const LOOP_OUTPUT_DIR = path.join("dist", "loop");
 
 // ---------------------------------------------------------------------------
 // ファイル名生成
@@ -43,7 +46,7 @@ function generateBaseName(): string {
 /**
  * 生成された動画をダウンロードし、メタデータ JSON を保存する。
  *
- * - dist/ ディレクトリが存在しない場合は自動作成する
+ * - 出力ディレクトリが存在しない場合は自動作成する（デフォルトは dist/）
  * - ダウンロード中は .part 拡張子で一時保存し、完了後に .mp4 にリネームする
  * - ダウンロード失敗時は .part ファイルを削除する
  * - メタデータ JSON を動画と同名の .json ファイルとして保存する
@@ -53,19 +56,31 @@ function generateBaseName(): string {
  * @param config - 解決済みの設定
  * @returns 出力された動画ファイルのパス
  */
+/** メタデータに追加で載せる項目・出力先の上書き */
+export interface DownloadVideoOptions {
+  /** 出力ディレクトリ（省略時は dist） */
+  outputDir?: string;
+  mode?: VideoMetadata["mode"];
+  firstFramePath?: string;
+  lastFramePath?: string;
+}
+
 export async function downloadVideo(
   prompt: string,
   result: GenerateVideoResult,
   config: ResolvedConfig,
+  options?: DownloadVideoOptions,
 ): Promise<string> {
-  // dist/ ディレクトリの存在確認・自動作成
-  await mkdir(OUTPUT_DIR, { recursive: true });
+  const outDir = options?.outputDir ?? OUTPUT_DIR;
+
+  // 出力ディレクトリの存在確認・自動作成
+  await mkdir(outDir, { recursive: true });
 
   // ファイル名の生成
   const baseName = generateBaseName();
-  const mp4Path = path.join(OUTPUT_DIR, `${baseName}.mp4`);
-  const partPath = path.join(OUTPUT_DIR, `${baseName}.mp4.part`);
-  const jsonPath = path.join(OUTPUT_DIR, `${baseName}.json`);
+  const mp4Path = path.join(outDir, `${baseName}.mp4`);
+  const partPath = path.join(outDir, `${baseName}.mp4.part`);
+  const jsonPath = path.join(outDir, `${baseName}.json`);
 
   // SDK クライアントを作成してダウンロード
   const ai = new GoogleGenAI({ apiKey: config.apiKey });
@@ -95,6 +110,9 @@ export async function downloadVideo(
 
   // メタデータ JSON の生成・保存
   const metadata: VideoMetadata = {
+    ...(options?.mode !== undefined ? { mode: options.mode } : {}),
+    ...(options?.firstFramePath !== undefined ? { firstFrame: options.firstFramePath } : {}),
+    ...(options?.lastFramePath !== undefined ? { lastFrame: options.lastFramePath } : {}),
     prompt,
     model: config.model,
     resolution: config.resolution,

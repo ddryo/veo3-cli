@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsup",
-    "generate": "node .build/cli.js"
+    "generate": "node .build/cli.js",
+    "generate:loop": "node .build/cli-loop.js"
   },
   "engines": {
     "node": ">=20.0.0"

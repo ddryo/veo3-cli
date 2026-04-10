@@ -51,6 +51,27 @@ npm run generate -- "夕暮れの海岸を歩く猫"
 npm run generate -- "夕暮れの海岸を歩く猫" --model standard --resolution 1080p --duration 8
 ```
 
+### ループ素材（`generate:loop`）
+
+ループ用の **画像1枚** と **プロンプト** だけを指定します。内部では API に同じ画像を先頭フレーム・末尾フレームの両方として渡し、間の動きを生成します。
+
+**対応画像形式**: `.png` / `.jpg` / `.jpeg` / `.webp`
+
+```bash
+npm run generate:loop -- ./loop.jpg "光がゆっくり脈打つ"
+```
+
+`generate` と同様に `--model` / `--resolution` / `--aspect` / `--duration` を付けられます。
+
+| 引数 / オプション | 短縮 | 必須 | 説明 |
+|------------------|------|------|------|
+| `<image>` | なし | Yes | ループ素材の画像パス |
+| `<prompt>` | なし | Yes | 動きや雰囲気のテキスト |
+| `--model` | `-m` | No | `fast` / `standard`（デフォルト: `standard`） |
+| `--resolution` | `-r` | No | `720p` / `1080p` / `4K` |
+| `--aspect` | `-a` | No | `16:9` / `9:16` |
+| `--duration` | `-d` | No | `4` / `6` / `8`（秒） |
+
 ### オプション一覧
 
 | オプション | 短縮 | 型 | 選択肢 | デフォルト | 説明 |
@@ -95,7 +116,17 @@ npm run generate -- "夕暮れの海岸を歩く猫" --model standard --resoluti
 
 ## 出力
 
-生成された動画は `dist/` ディレクトリに以下の形式で保存されます。
+生成された動画は次のディレクトリに、タイムスタンプ付きファイル名で保存されます。
+
+| コマンド | 保存先 |
+|---------|--------|
+| `npm run generate` | `dist/` |
+| `npm run generate:loop` | `dist/loop/` |
 
 - `{タイムスタンプ}_{ランダム文字列}.mp4` - 動画ファイル
 - `{タイムスタンプ}_{ランダム文字列}.json` - メタデータ（プロンプト、設定値、生成日時など）
+
+`generate:loop` で生成した場合、JSON には次のフィールドが追加されます。
+
+- `mode` — `"first-last-loop"`
+- `firstFrame` / `lastFrame` — 使用した画像の絶対パス

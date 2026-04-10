@@ -8,3 +8,7 @@ dist/
 .DS_Store
 *.log
 *.part
+
+
+/loop*
+/prompt.txt

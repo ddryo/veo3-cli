@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import type { GenerateVideosOperation, GeneratedVideo } from "@google/genai";
+import type { GenerateVideosOperation, GeneratedVideo, Image } from "@google/genai";
 import type { ResolvedConfig } from "./types.js";
 
 // ---------------------------------------------------------------------------
@@ -106,6 +106,94 @@ export async function generateVideo(
   const generatedVideos = operation.response?.generatedVideos;
   if (!generatedVideos || generatedVideos.length === 0) {
     throw new Error("動画が生成されませんでした。プロンプトを変更して再度お試しください。");
+  }
+
+  const video = generatedVideos[0].video;
+  if (!video?.uri) {
+    throw new Error("生成された動画の URI が取得できませんでした。");
+  }
+
+  const totalElapsed = Math.floor((Date.now() - startTime) / 1000);
+  console.log(`動画生成が完了しました（${totalElapsed}秒）`);
+
+  return {
+    videoUri: video.uri,
+    mimeType: video.mimeType ?? "video/mp4",
+    generatedVideo: generatedVideos[0],
+  };
+}
+
+/**
+ * 先頭フレーム・末尾フレーム画像とプロンプトで動画を生成する（ループ向きの補間生成）。
+ * API では `image` が先頭、`config.lastFrame` が末尾に対応する。
+ *
+ * @param prompt - 2 枚の間の動き・ループの意図を表すテキスト
+ * @param firstFrame - 先頭フレーム用画像
+ * @param lastFrame - 末尾フレーム用画像（ループなら先頭と同じ画像を渡すのが一般的）
+ * @param config - 解決済みの設定
+ */
+export async function generateVideoWithFirstLastFrames(
+  prompt: string,
+  firstFrame: Image,
+  lastFrame: Image,
+  config: ResolvedConfig,
+): Promise<GenerateVideoResult> {
+  const ai = new GoogleGenAI({ apiKey: config.apiKey });
+
+  console.log("動画生成を開始しています（先頭・末尾フレーム指定）...");
+  let operation = await ai.models.generateVideos({
+    model: config.model,
+    prompt,
+    image: firstFrame,
+    config: {
+      aspectRatio: config.aspectRatio,
+      resolution: config.resolution,
+      durationSeconds: config.duration,
+      numberOfVideos: 1,
+      lastFrame,
+    },
+  });
+
+  const startTime = Date.now();
+  const deadline = startTime + POLL_TIMEOUT_MS;
+
+  checkOperationError(operation);
+
+  while (!operation.done) {
+    const now = Date.now();
+    const remaining = deadline - now;
+
+    if (remaining <= 0) {
+      throw new Error(
+        `動画生成がタイムアウトしました（${POLL_TIMEOUT_MS / 1000}秒）。\n` +
+          "時間をおいて再度お試しください。",
+      );
+    }
+
+    const elapsedSec = Math.floor((now - startTime) / 1000);
+    process.stdout.write(`\r待機中... ${elapsedSec}秒経過`);
+
+    await sleep(Math.min(POLL_INTERVAL_MS, remaining));
+
+    if (Date.now() >= deadline) {
+      throw new Error(
+        `動画生成がタイムアウトしました（${POLL_TIMEOUT_MS / 1000}秒）。\n` +
+          "時間をおいて再度お試しください。",
+      );
+    }
+
+    operation = await ai.operations.getVideosOperation({
+      operation,
+    });
+
+    checkOperationError(operation);
+  }
+
+  console.log("");
+
+  const generatedVideos = operation.response?.generatedVideos;
+  if (!generatedVideos || generatedVideos.length === 0) {
+    throw new Error("動画が生成されませんでした。プロンプトや画像を変更して再度お試しください。");
   }
 
   const video = generatedVideos[0].video;

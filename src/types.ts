@@ -46,6 +46,12 @@ export interface ResolvedConfig {
 
 /** 動画生成時に保存するメタデータ */
 export interface VideoMetadata {
+  /** 生成モード（省略時は従来のテキストのみ生成とみなす） */
+  mode?: "text" | "first-last-loop";
+  /** 先頭フレームに使った画像パス（first-last-loop 時） */
+  firstFrame?: string;
+  /** 末尾フレームに使った画像パス（first-last-loop 時） */
+  lastFrame?: string;
   /** 使用したプロンプト */
   prompt: string;
   /** 使用したモデル（API モデル名） */
